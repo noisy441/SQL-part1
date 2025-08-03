@@ -23,13 +23,67 @@
 
 Получите уникальные названия районов из таблицы с адресами, которые начинаются на “K” и заканчиваются на “a” и не содержат пробелов.
 
+---
+
+### Решение 1
+
+Для получения районов из таблицы с адресами выполним запрос:
+
+```
+
+SELECT DISTINCT district
+FROM sakila.address
+WHERE district LIKE 'K%a' AND district NOT LIKE '% %';
+
+```
+
+![Решение 1](https://github.com/noisy441/SQL-part1/blob/main/img/img1.png)
+
+---
+
 ### Задание 2
 
 Получите из таблицы платежей за прокат фильмов информацию по платежам, которые выполнялись в промежуток с 15 июня 2005 года по 18 июня 2005 года **включительно** и стоимость которых превышает 10.00.
 
+---
+
+### Решение 2
+
+Выполним запрос на получение требуемых сведений.
+
+```
+
+SELECT * FROM sakila.payment
+WHERE payment_date >= '2005-06-15'
+	AND payment_date <= '2005-06-18'
+    AND amount > 10.00;
+
+```
+Таким образом мы выбираем все столбцы в таблице payment и фильтруем строки в соответствии с заданными условиями. Можно так же сократить число столбцов выбрав вместо * названия конкретных стольцов amount и payment_date.
+
+![Решение 2](https://github.com/noisy441/SQL-part1/blob/main/img/img2.png)
+
+---
+
 ### Задание 3
 
 Получите последние пять аренд фильмов.
+
+### Решение 3
+
+Сортируем таблицу rental с помощью ORDER BY и модификатора RENT который отсортирует столбец по убыванию от большего к меньшему и с помощью LIMIT установим количество выводимых строк.
+
+```
+
+SELECT * FROM sakila.rental
+ORDER BY rental_date DESC
+LIMIT 5;
+
+```
+
+![Решение 3](https://github.com/noisy441/SQL-part1/blob/main/img/img3.png)
+
+---
 
 ### Задание 4
 
@@ -39,6 +93,40 @@
 - все буквы в фамилии и имени из верхнего регистра переведите в нижний регистр,
 - замените буквы 'll' в именах на 'pp'.
 
+### Решение 4
+
+Приведем к нижнему ренистру имена и фамилии с помощью 
+
+```
+LOWER(first_name) AS first_name,
+LOWER(last_name) AS last_name,
+```
+
+Заменим буквы ll на pp
+
+```
+REPLACE(LOWER(first_name), 'll', 'pp') AS modified_first_name,
+```
+
+В итоге получим следующий запрос
+
+```
+
+SELECT 
+	LOWER(first_name) AS first_name,
+    LOWER(last_name) AS last_name,
+    REPLACE(LOWER(first_name), 'll', 'pp') AS modified_first_name,
+    active
+FROM sakila.customer
+WHERE first_name IN ('Kelly', 'Willie')
+	AND active = 1;
+
+```
+
+![Решение 4](https://github.com/noisy441/SQL-part1/blob/main/img/img4.png)
+
+---
+
 ## Дополнительные задания (со звёздочкой*)
 Эти задания дополнительные, то есть не обязательные к выполнению, и никак не повлияют на получение вами зачёта по этому домашнему заданию. Вы можете их выполнить, если хотите глубже шире разобраться в материале.
 
@@ -46,6 +134,44 @@
 
 Выведите Email каждого покупателя, разделив значение Email на две отдельных колонки: в первой колонке должно быть значение, указанное до @, во второй — значение, указанное после @.
 
+---
+
+### Решение 5
+
+SUBSTRING_INDEX(email, '@', 1) отделит значение до знака @, а -1 после.
+Полный код выглядит так.
+
+```
+
+SELECT 
+	SUBSTRING_INDEX(email, '@', 1) AS username,
+    SUBSTRING_INDEX(email, '@', -1) AS domain
+FROM sakila.customer;
+
+```
+
+![Решение 5](https://github.com/noisy441/SQL-part1/blob/main/img/img5.png)
+
+---
+
 ### Задание 6*
 
 Доработайте запрос из предыдущего задания, скорректируйте значения в новых колонках: первая буква должна быть заглавной, остальные — строчными.
+
+### Решение 6
+
+```
+
+SELECT 
+	CONCAT(
+		UPPER(SUBSTRING(SUBSTRING_INDEX(email, '@', 1), 1, 1)),
+		LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', 1), 2))
+	) AS username,
+	CONCAT(
+		UPPER(SUBSTRING(SUBSTRING_INDEX(email, '@', -1), 1, 1)),
+		LOWER(SUBSTRING(SUBSTRING_INDEX(email, '@', -1), 2))
+	) AS domain
+FROM sakila.customer;
+
+```
+![Решение 6](https://github.com/noisy441/SQL-part1/blob/main/img/img6.png)
